@@ -1,0 +1,63 @@
+@theme {
+  --font-poppins: "Poppins-Regular";
+  --font-poppins-medium: "Poppins-Medium";
+  --font-poppins-semibold: "Poppins-SemiBold";
+  --font-poppins-bold: "Poppins-Bold";
+  --font-sans: "Poppins-Regular";
+}
+
+:root {
+  --font-poppins: "Poppins-Regular";
+  --font-poppins-medium: "Poppins-Medium";
+  --font-poppins-semibold: "Poppins-SemiBold";
+  --font-poppins-bold: "Poppins-Bold";
+  --font-sans: "Poppins-Regular";
+}
+
+@utility text-h1 {
+  font-family: var(--font-poppins-bold);
+  font-size: 32px;
+  line-height: 1.2;
+}
+
+@utility text-h2 {
+  font-family: var(--font-poppins-semibold);
+  font-size: 24px;
+  line-height: 1.3;
+}
+
+@utility text-h3 {
+  font-family: var(--font-poppins-semibold);
+  font-size: 20px;
+  line-height: 1.3;
+}
+
+@utility text-h4 {
+  font-family: var(--font-poppins-medium);
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+@utility text-body-lg {
+  font-family: var(--font-poppins);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+@utility text-body-md {
+  font-family: var(--font-poppins);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+@utility text-body-sm {
+  font-family: var(--font-poppins);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+@utility text-caption {
+  font-family: var(--font-poppins);
+  font-size: 11px;
+  line-height: 1.4;
+}

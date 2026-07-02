@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Duolingo-temp",
-    "slug": "Duolingo-temp",
+    "name": "Duolingo",
+    "slug": "duolingo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "duolingotemp",
+    "scheme": "duolingo",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true
@@ -26,6 +26,18 @@
     },
     "plugins": [
       "expo-router",
+      "expo-secure-store",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Poppins-Regular.ttf",
+            "./assets/fonts/Poppins-Medium.ttf",
+            "./assets/fonts/Poppins-SemiBold.ttf",
+            "./assets/fonts/Poppins-Bold.ttf"
+          ]
+        }
+      ],
       [
         "expo-splash-screen",
         {
