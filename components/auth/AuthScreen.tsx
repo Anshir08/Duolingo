@@ -144,6 +144,7 @@ export function AuthScreen({ mode }: AuthScreenProps) {
         <AuthPrimaryButton
           label={isLoading ? 'Please wait...' : content.primaryLabel}
           onPress={handlePrimaryPress}
+          disabled={isLoading}
         />
 
         {isLoading ? (
