@@ -1,4 +1,6 @@
+import { useCallback, useEffect, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import * as Speech from 'expo-speech';
 import { SymbolView } from 'expo-symbols';
 
 import { colors, fontFamily, images, placeholderImages } from '@/theme';
@@ -9,7 +11,40 @@ type TeacherPreviewProps = {
   teachingFocus: string;
 };
 
+const speechLanguageByName: Record<string, string> = {
+  Spanish: 'es-ES',
+  French: 'fr-FR',
+  Japanese: 'ja-JP',
+  Korean: 'ko-KR',
+  German: 'de-DE',
+  Chinese: 'zh-CN',
+};
+
 export function TeacherPreview({ message, languageName, teachingFocus }: TeacherPreviewProps) {
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      Speech.stop();
+    };
+  }, []);
+
+  const handlePlayMessage = useCallback(() => {
+    if (isSpeaking) {
+      Speech.stop();
+      setIsSpeaking(false);
+      return;
+    }
+
+    Speech.speak(message, {
+      language: speechLanguageByName[languageName] ?? 'en-US',
+      onStart: () => setIsSpeaking(true),
+      onDone: () => setIsSpeaking(false),
+      onStopped: () => setIsSpeaking(false),
+      onError: () => setIsSpeaking(false),
+    });
+  }, [isSpeaking, languageName, message]);
+
   return (
     <View style={styles.card}>
       <View style={styles.backgroundGlow} />
@@ -27,7 +62,16 @@ export function TeacherPreview({ message, languageName, teachingFocus }: Teacher
             {languageName} • {teachingFocus}
           </Text>
         </View>
-        <Pressable hitSlop={8} style={styles.speakerButton}>
+        <Pressable
+          hitSlop={8}
+          style={styles.speakerButton}
+          onPress={handlePlayMessage}
+          accessibilityRole="button"
+          accessibilityLabel={
+            isSpeaking ? 'Stop teacher message audio' : 'Play teacher message audio'
+          }
+          accessibilityState={{ busy: isSpeaking }}
+        >
           <SymbolView
             name={{ ios: 'speaker.wave.2.fill', android: 'volume_up', web: 'volume_up' }}
             size={18}

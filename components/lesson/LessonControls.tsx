@@ -22,8 +22,10 @@ export function LessonControls({
     <View style={styles.row}>
       <ControlButton
         label="Camera"
-        icon={{ ios: 'video.fill', android: 'videocam', web: 'videocam' }}
-        onPress={() => undefined}
+        icon={{ ios: 'video.slash.fill', android: 'videocam_off', web: 'videocam_off' }}
+        active={false}
+        disabled
+        onPress={() => {}}
       />
 
       <ControlButton
@@ -59,18 +61,28 @@ type ControlButtonProps = {
   icon: SymbolViewProps['name'];
   active?: boolean;
   destructive?: boolean;
+  disabled?: boolean;
   onPress: () => void;
 };
 
-function ControlButton({ label, icon, active = true, destructive, onPress }: ControlButtonProps) {
+function ControlButton({
+  label,
+  icon,
+  active = true,
+  destructive,
+  disabled,
+  onPress,
+}: ControlButtonProps) {
   return (
     <View style={styles.item}>
       <Pressable
+        disabled={disabled}
         onPress={onPress}
         style={[
           styles.button,
           destructive && styles.buttonDestructive,
           !destructive && !active && styles.buttonMuted,
+          disabled && styles.buttonDisabled,
         ]}
       >
         <SymbolView
@@ -112,6 +124,9 @@ const styles = StyleSheet.create({
   },
   buttonMuted: {
     opacity: 0.72,
+  },
+  buttonDisabled: {
+    opacity: 0.45,
   },
   buttonDestructive: {
     backgroundColor: colors.semantic.error,

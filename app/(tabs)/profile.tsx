@@ -20,7 +20,6 @@ export default function ProfileScreen() {
     }
 
     setIsSigningOut(true);
-    router.replace('/onboarding');
 
     try {
       await signOut();
@@ -29,6 +28,8 @@ export default function ProfileScreen() {
     } finally {
       setIsSigningOut(false);
     }
+
+    router.replace('/onboarding');
   };
 
   const handleClearLanguageStorage = async () => {
@@ -47,7 +48,10 @@ export default function ProfileScreen() {
   };
 
   return (
-    <TabPlaceholderScreen title="Profile" subtitle="Profile settings coming soon.">
+    <TabPlaceholderScreen
+      title="Profile"
+      subtitle="Manage your learning language or sign out of your account."
+    >
       <View style={styles.actions}>
         {selectedLanguageId ? (
           <Text style={styles.meta}>Selected language: {selectedLanguageId}</Text>

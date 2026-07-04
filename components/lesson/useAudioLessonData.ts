@@ -9,23 +9,34 @@ export type AudioLessonData = {
   teacherMessage: string;
 };
 
-export function getAudioLessonData(lessonId: string): AudioLessonData | null {
+export type AudioLessonLookupResult =
+  | { status: 'found'; data: AudioLessonData }
+  | { status: 'not-found' };
+
+export function getAudioLessonData(lessonId: string | undefined): AudioLessonLookupResult {
+  if (!lessonId) {
+    return { status: 'not-found' };
+  }
+
   const lesson = getLessonById(lessonId);
 
   if (!lesson) {
-    return null;
+    return { status: 'not-found' };
   }
 
   const language = getLanguageById(lesson.languageId);
 
   if (!language) {
-    return null;
+    return { status: 'not-found' };
   }
 
   return {
-    lesson,
-    language,
-    primaryGoal: lesson.goals[0]?.description ?? lesson.description,
-    teacherMessage: lesson.aiTeacher.openingLine,
+    status: 'found',
+    data: {
+      lesson,
+      language,
+      primaryGoal: lesson.goals[0]?.description ?? lesson.description,
+      teacherMessage: lesson.aiTeacher.openingLine,
+    },
   };
 }

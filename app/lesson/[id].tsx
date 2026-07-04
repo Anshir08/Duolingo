@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -9,24 +9,30 @@ import { LessonDetailsPanel } from '@/components/lesson/LessonDetailsPanel';
 import { LessonFeedbackCard } from '@/components/lesson/LessonFeedbackCard';
 import { TeacherPreview } from '@/components/lesson/TeacherPreview';
 import { getAudioLessonData } from '@/components/lesson/useAudioLessonData';
-import { colors } from '@/theme';
+import { colors, fontFamily } from '@/theme';
 
 export default function AudioLessonScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const lessonData = useMemo(() => (id ? getAudioLessonData(id) : null), [id]);
+  const lessonResult = useMemo(() => getAudioLessonData(id), [id]);
   const [micEnabled, setMicEnabled] = useState(true);
   const [subtitlesEnabled, setSubtitlesEnabled] = useState(true);
 
-  if (!lessonData) {
+  if (lessonResult.status === 'not-found') {
     return (
       <View style={styles.loading}>
-        <ActivityIndicator color={colors.primary.purple} />
+        <Text style={styles.errorTitle}>Lesson not found</Text>
+        <Text style={styles.errorMessage}>
+          This lesson is unavailable or the link is invalid.
+        </Text>
+        <Pressable onPress={() => router.back()} style={styles.backButton}>
+          <Text style={styles.backLabel}>Go back</Text>
+        </Pressable>
       </View>
     );
   }
 
-  const { lesson, language, primaryGoal, teacherMessage } = lessonData;
+  const { lesson, language, primaryGoal, teacherMessage } = lessonResult.data;
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -83,5 +89,35 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.neutral.background,
+    paddingHorizontal: 24,
+    gap: 12,
+  },
+  errorTitle: {
+    fontFamily: fontFamily.bold,
+    fontSize: 20,
+    lineHeight: 28,
+    color: colors.neutral.textPrimary,
+    textAlign: 'center',
+  },
+  errorMessage: {
+    fontFamily: fontFamily.regular,
+    fontSize: 14,
+    lineHeight: 20,
+    color: colors.neutral.textSecondary,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  backButton: {
+    borderWidth: 1,
+    borderColor: colors.neutral.border,
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+  },
+  backLabel: {
+    fontFamily: fontFamily.semibold,
+    fontSize: 14,
+    lineHeight: 20,
+    color: colors.primary.purple,
   },
 });

@@ -115,8 +115,8 @@ export default function LanguageSelectionScreen() {
           onPress={handleSeeAllLanguages}
           style={({ pressed }) => [styles.seeAllButton, pressed && styles.seeAllButtonPressed]}
         >
-          <Text style={styles.globeIcon}>🌐</Text>
-          <Text style={styles.seeAllLabel}>See all languages</Text>
+          <Text style={styles.globeIcon}>✅</Text>
+          <Text style={styles.seeAllLabel}>Continue</Text>
         </Pressable>
       </ScrollView>
 
