@@ -5,13 +5,19 @@ import { colors, fontFamily } from '@/theme';
 type AuthPrimaryButtonProps = {
   label: string;
   onPress?: () => void;
+  disabled?: boolean;
 };
 
-export function AuthPrimaryButton({ label, onPress }: AuthPrimaryButtonProps) {
+export function AuthPrimaryButton({ label, onPress, disabled }: AuthPrimaryButtonProps) {
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+      disabled={disabled}
+      style={({ pressed }) => [
+        styles.button,
+        disabled && styles.buttonDisabled,
+        pressed && !disabled && styles.buttonPressed,
+      ]}
     >
       <Text style={styles.buttonText}>{label}</Text>
     </Pressable>
@@ -60,6 +66,9 @@ const styles = StyleSheet.create({
   },
   buttonPressed: {
     opacity: 0.9,
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
   buttonText: {
     fontFamily: fontFamily.semibold,

@@ -117,19 +117,25 @@ export function useClerkEmailAuth(mode: AuthMode) {
 
   const startSocialAuth = useCallback(
     async (provider: SocialProvider) => {
-      const oauthByProvider = {
-        google: googleOAuth,
-        facebook: facebookOAuth,
-        apple: appleOAuth,
-      } as const;
+      setIsLoading(true);
 
-      const redirectUrl = Linking.createURL('/sso-callback', { scheme: 'duolingo' });
-      const { startOAuthFlow } = oauthByProvider[provider];
-      const { createdSessionId, setActive } = await startOAuthFlow({ redirectUrl });
+      try {
+        const oauthByProvider = {
+          google: googleOAuth,
+          facebook: facebookOAuth,
+          apple: appleOAuth,
+        } as const;
 
-      if (createdSessionId && setActive) {
-        await setActive({ session: createdSessionId });
-        router.replace('/');
+        const redirectUrl = Linking.createURL('/sso-callback', { scheme: 'duolingo' });
+        const { startOAuthFlow } = oauthByProvider[provider];
+        const { createdSessionId, setActive } = await startOAuthFlow({ redirectUrl });
+
+        if (createdSessionId && setActive) {
+          await setActive({ session: createdSessionId });
+          router.replace('/');
+        }
+      } finally {
+        setIsLoading(false);
       }
     },
     [appleOAuth, facebookOAuth, googleOAuth, router],
