@@ -1,3 +1,4 @@
+import { ServerConfigError } from '@/lib/stream/server/apiErrors';
 import { authenticateClerkRequest } from '@/lib/stream/server/clerkAuth';
 import { getStreamApiKey, getStreamServerClient } from '@/lib/stream/server/streamClient';
 
@@ -29,9 +30,12 @@ export async function POST(request: Request) {
       apiKey: getStreamApiKey(),
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to create Stream token';
-    const status = message.includes('CLERK_SECRET_KEY') ? 503 : 500;
+    console.error('[stream/token]', error);
 
-    return Response.json({ error: message }, { status });
+    if (error instanceof ServerConfigError) {
+      return Response.json({ error: 'Stream token service is unavailable' }, { status: 503 });
+    }
+
+    return Response.json({ error: 'Failed to create Stream token' }, { status: 500 });
   }
 }

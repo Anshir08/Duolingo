@@ -22,6 +22,7 @@ export function useVisionAgentSession({
   const sessionIdRef = useRef<string | null>(null);
   const callIdRef = useRef<string | null>(null);
   const stopAgentRef = useRef<() => Promise<void>>(async () => undefined);
+  const cancelRetryRef = useRef<(() => void) | null>(null);
 
   const stopAgent = useCallback(async () => {
     const activeSessionId = sessionIdRef.current;
@@ -103,6 +104,8 @@ export function useVisionAgentSession({
 
     return () => {
       cancelled = true;
+      cancelRetryRef.current?.();
+      cancelRetryRef.current = null;
       void stopAgentRef.current();
     };
   }, [callId, callType, enabled, getToken, isSignedIn]);
@@ -112,6 +115,13 @@ export function useVisionAgentSession({
       return;
     }
 
+    cancelRetryRef.current?.();
+
+    let cancelled = false;
+    cancelRetryRef.current = () => {
+      cancelled = true;
+    };
+
     setStatus('idle');
     setErrorMessage(null);
     setSessionId(null);
@@ -119,25 +129,52 @@ export function useVisionAgentSession({
     callIdRef.current = null;
 
     void (async () => {
+      if (cancelled) {
+        return;
+      }
+
       setStatus('connecting');
 
       try {
         const authToken = await getToken();
+
+        if (cancelled) {
+          return;
+        }
 
         if (!authToken) {
           throw new Error('Sign in again to connect the AI teacher.');
         }
 
         const session = await startVisionAgent(authToken, { callId, callType });
+
+        if (cancelled) {
+          await stopVisionAgent(authToken, {
+            callId: session.callId,
+            sessionId: session.sessionId,
+          }).catch(() => undefined);
+          return;
+        }
+
         sessionIdRef.current = session.sessionId;
         callIdRef.current = session.callId;
         setSessionId(session.sessionId);
         setStatus('connected');
       } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
         const message =
           error instanceof Error ? error.message : 'Unable to connect the AI teacher.';
+
         setStatus('failed');
         setErrorMessage(message);
+        setSessionId(null);
+      } finally {
+        if (!cancelled) {
+          cancelRetryRef.current = null;
+        }
       }
     })();
   }, [callId, callType, enabled, getToken]);

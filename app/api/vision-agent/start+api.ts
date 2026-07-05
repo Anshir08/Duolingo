@@ -1,4 +1,5 @@
 import { authenticateClerkRequest } from '@/lib/stream/server/clerkAuth';
+import { userIsCallMember } from '@/lib/stream/server/callMembership';
 import { startVisionAgentSession } from '@/lib/vision-agent/server/visionAgentClient';
 
 type StartVisionAgentBody = {
@@ -14,10 +15,32 @@ export async function POST(request: Request) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = (await request.json()) as StartVisionAgentBody;
+    let body: StartVisionAgentBody;
 
-    if (!body.callId || !body.callType) {
+    try {
+      body = (await request.json()) as StartVisionAgentBody;
+    } catch {
+      return Response.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
+
+    if (
+      typeof body.callId !== 'string' ||
+      typeof body.callType !== 'string' ||
+      !body.callId.trim() ||
+      !body.callType.trim()
+    ) {
       return Response.json({ error: 'callId and callType are required' }, { status: 400 });
+    }
+
+    try {
+      const isMember = await userIsCallMember(body.callType, body.callId, authUser.userId);
+
+      if (!isMember) {
+        return Response.json({ error: 'Forbidden' }, { status: 403 });
+      }
+    } catch (error) {
+      console.error('[vision-agent/start] call membership check failed', error);
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const session = await startVisionAgentSession(body.callId, body.callType);

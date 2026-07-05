@@ -12,6 +12,7 @@ function toIsoDate(date: Date) {
 export async function identifyClerkUser(
   userId: string,
   preferredLanguage: LanguageId | null,
+  createdAt: Date,
 ) {
   if (!posthog) {
     return;
@@ -24,7 +25,7 @@ export async function identifyClerkUser(
   if (!hasIdentifiedBefore) {
     posthog.identify(userId, {
       $set_once: {
-        signup_date: toIsoDate(new Date()),
+        signup_date: toIsoDate(createdAt),
         preferred_language: languageValue,
       },
       $set: {

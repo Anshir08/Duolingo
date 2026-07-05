@@ -1,17 +1,28 @@
 from __future__ import annotations
 
+import logging
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 
 def call_custom_data(call: Any) -> dict[str, Any]:
     """Read lesson metadata stored on the Stream call by the mobile app."""
     custom = getattr(call, "custom_data", None)
-    if isinstance(custom, dict):
+    if not isinstance(custom, dict) or not custom:
+        custom = getattr(call, "custom", None)
+
+    if isinstance(custom, dict) and custom:
         return custom
 
-    data = getattr(call, "_data", None)
-    nested = getattr(data, "custom", None) if data is not None else None
-    return nested if isinstance(nested, dict) else {}
+    call_id = getattr(call, "id", None) or getattr(call, "call_id", "unknown")
+    call_type = getattr(call, "type", None) or getattr(call, "call_type", "unknown")
+    logger.warning(
+        "No lesson metadata found on Stream call %s (%s); agent will default to Spanish/Beginner context.",
+        call_id,
+        call_type,
+    )
+    return {}
 
 
 def _pick(data: dict[str, Any], *keys: str, default: str = "") -> str:

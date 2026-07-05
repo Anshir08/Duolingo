@@ -1,7 +1,11 @@
-import Constants, { ExecutionEnvironment } from 'expo-constants';
+import { NativeModules, Platform } from 'react-native';
 
 export function canUseStreamVideo() {
-  return Constants.executionEnvironment !== ExecutionEnvironment.StoreClient;
+  if (Platform.OS === 'web') {
+    return false;
+  }
+
+  return NativeModules.WebRTCModule != null;
 }
 
 export const STREAM_UNAVAILABLE_MESSAGE =

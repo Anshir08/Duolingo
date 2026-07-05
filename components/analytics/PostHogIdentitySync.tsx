@@ -10,12 +10,12 @@ export function PostHogIdentitySync() {
   const hasHydrated = useLanguageStore((state) => state.hasHydrated);
 
   useEffect(() => {
-    if (!isLoaded || !isSignedIn || !user?.id || !hasHydrated) {
+    if (!isLoaded || !isSignedIn || !user?.id || !user.createdAt || !hasHydrated) {
       return;
     }
 
-    void identifyClerkUser(user.id, selectedLanguageId);
-  }, [hasHydrated, isLoaded, isSignedIn, selectedLanguageId, user?.id]);
+    void identifyClerkUser(user.id, selectedLanguageId, user.createdAt);
+  }, [hasHydrated, isLoaded, isSignedIn, selectedLanguageId, user?.createdAt, user?.id]);
 
   return null;
 }

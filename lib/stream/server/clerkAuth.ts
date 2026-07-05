@@ -1,5 +1,7 @@
 import { createClerkClient, verifyToken } from '@clerk/backend';
 
+import { ServerConfigError } from '@/lib/stream/server/apiErrors';
+
 export type AuthenticatedClerkUser = {
   userId: string;
   name: string;
@@ -18,11 +20,16 @@ export async function authenticateClerkRequest(
   const secretKey = process.env.CLERK_SECRET_KEY;
 
   if (!secretKey) {
-    throw new Error('Missing CLERK_SECRET_KEY for server auth');
+    throw new ServerConfigError('Missing CLERK_SECRET_KEY for server auth');
   }
 
-  const verified = await verifyToken(sessionToken, { secretKey });
-  const userId = verified.sub;
+  const result = await verifyToken(sessionToken, { secretKey });
+
+  if (result.errors) {
+    return null;
+  }
+
+  const userId = result.data.sub;
 
   if (!userId) {
     return null;

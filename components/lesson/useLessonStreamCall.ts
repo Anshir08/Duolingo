@@ -42,6 +42,15 @@ export function useLessonStreamCall({ lessonData }: UseLessonStreamCallOptions) 
     let cancelled = false;
     let activeCall: Call | null = null;
 
+    const leaveJoinedCall = async (callToLeave: Call) => {
+      if (callToLeave.state.callingState === CallingState.LEFT) {
+        return;
+      }
+
+      await callToLeave.stopClosedCaptions().catch(() => undefined);
+      await callToLeave.leave().catch(() => undefined);
+    };
+
     const joinLessonCall = async () => {
       setStatus('connecting');
       setErrorMessage(null);
@@ -71,7 +80,21 @@ export function useLessonStreamCall({ lessonData }: UseLessonStreamCallOptions) 
         setCallType(session.callType);
 
         await nextCall.join();
+
+        if (cancelled) {
+          await leaveJoinedCall(nextCall);
+          activeCall = null;
+          return;
+        }
+
         await nextCall.camera.disable();
+
+        if (cancelled) {
+          await leaveJoinedCall(nextCall);
+          activeCall = null;
+          return;
+        }
+
         await nextCall.microphone.enable();
         nextCall.updateClosedCaptionSettings({
           maxVisibleCaptions: 0,
@@ -80,12 +103,19 @@ export function useLessonStreamCall({ lessonData }: UseLessonStreamCallOptions) 
         await nextCall.startClosedCaptions().catch(() => undefined);
 
         if (cancelled) {
+          await leaveJoinedCall(nextCall);
+          activeCall = null;
           return;
         }
 
         setMicEnabled(true);
         setStatus('joined');
       } catch (error) {
+        if (activeCall) {
+          await leaveJoinedCall(activeCall);
+          activeCall = null;
+        }
+
         if (cancelled) {
           return;
         }

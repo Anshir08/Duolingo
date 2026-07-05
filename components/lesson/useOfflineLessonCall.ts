@@ -14,11 +14,7 @@ export function useOfflineLessonCall() {
   const userName = user?.fullName ?? user?.username ?? 'Learner';
 
   const toggleMic = useCallback(async () => {
-    setMicEnabled((current) => {
-      const next = !current;
-      setStatus(next ? 'joined' : 'muted');
-      return next;
-    });
+    setMicEnabled((current) => !current);
   }, []);
 
   const endCall = useCallback(async () => {

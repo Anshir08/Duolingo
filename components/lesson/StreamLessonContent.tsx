@@ -7,7 +7,7 @@ import {
   type User,
 } from '@stream-io/video-react-native-sdk';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AgentConnectionBanner } from '@/components/lesson/AgentConnectionBanner';
@@ -40,10 +40,17 @@ function StreamVideoRoot({ children }: { children: ReactNode }) {
   const { getToken, isSignedIn } = useAuth();
   const { user, isLoaded } = useUser();
   const [client, setClient] = useState<StreamVideoClient>();
+  const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [connectAttempt, setConnectAttempt] = useState(0);
+
+  const retryConnect = useCallback(() => {
+    setConnectAttempt((current) => current + 1);
+  }, []);
 
   useEffect(() => {
     if (!isLoaded || !isSignedIn || !user?.id) {
       setClient(undefined);
+      setConnectionError(null);
       return;
     }
 
@@ -51,60 +58,102 @@ function StreamVideoRoot({ children }: { children: ReactNode }) {
     let videoClient: StreamVideoClient | undefined;
 
     const connectStreamUser = async () => {
-      const authToken = await getToken();
+      setConnectionError(null);
 
-      if (!authToken) {
-        throw new Error('Missing Clerk session token');
-      }
+      try {
+        const authToken = await getToken();
 
-      const streamUser: User = {
-        id: user.id,
-        name: user.fullName ?? user.username ?? 'Learner',
-        image: user.imageUrl,
-      };
-
-      const { token, apiKey } = await fetchStreamToken(authToken);
-
-      if (cancelled) {
-        return;
-      }
-
-      const tokenProvider = async () => {
-        const nextAuthToken = await getToken();
-
-        if (!nextAuthToken) {
-          throw new Error('Missing Clerk session token');
+        if (!authToken) {
+          throw new Error('Sign in again to start an audio lesson.');
         }
 
-        const nextTokenResponse = await fetchStreamToken(nextAuthToken);
-        return nextTokenResponse.token;
-      };
+        const streamUser: User = {
+          id: user.id,
+          name: user.fullName ?? user.username ?? 'Learner',
+          image: user.imageUrl,
+        };
 
-      videoClient = StreamVideoClient.getOrCreateInstance({
-        apiKey,
-        user: streamUser,
-        token,
-        tokenProvider,
-      });
+        const { token, apiKey } = await fetchStreamToken(authToken);
 
-      setClient(videoClient);
-    };
+        if (cancelled) {
+          return;
+        }
 
-    connectStreamUser().catch(() => {
-      if (!cancelled) {
+        const tokenProvider = async () => {
+          const nextAuthToken = await getToken();
+
+          if (!nextAuthToken) {
+            throw new Error('Sign in again to start an audio lesson.');
+          }
+
+          const nextTokenResponse = await fetchStreamToken(nextAuthToken);
+          return nextTokenResponse.token;
+        };
+
+        videoClient = StreamVideoClient.getOrCreateInstance({
+          apiKey,
+          user: streamUser,
+          token,
+          tokenProvider,
+        });
+
+        setClient(videoClient);
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
+        console.error('[StreamVideoRoot] connectStreamUser failed', error);
+
+        const message =
+          error instanceof Error ? error.message : 'Unable to connect to the audio lesson.';
+
+        setConnectionError(message);
         setClient(undefined);
       }
-    });
+    };
+
+    void connectStreamUser();
 
     return () => {
       cancelled = true;
       videoClient?.disconnectUser().catch(() => undefined);
       setClient(undefined);
     };
-  }, [getToken, isLoaded, isSignedIn, user?.fullName, user?.id, user?.imageUrl, user?.username]);
+  }, [connectAttempt, getToken, isLoaded, isSignedIn, user?.id]);
 
-  if (!isSignedIn || !client) {
+  if (!isLoaded) {
+    return (
+      <View style={rootStyles.centered}>
+        <ActivityIndicator color={colors.primary.purple} />
+        <Text style={rootStyles.message}>Loading audio lesson...</Text>
+      </View>
+    );
+  }
+
+  if (!isSignedIn || !user?.id) {
     return children;
+  }
+
+  if (connectionError) {
+    return (
+      <View style={rootStyles.centered}>
+        <Text style={rootStyles.errorTitle}>Couldn&apos;t connect to audio</Text>
+        <Text style={rootStyles.message}>{connectionError}</Text>
+        <Pressable onPress={retryConnect} style={rootStyles.retryButton}>
+          <Text style={rootStyles.retryLabel}>Retry</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  if (!client) {
+    return (
+      <View style={rootStyles.centered}>
+        <ActivityIndicator color={colors.primary.purple} />
+        <Text style={rootStyles.message}>Connecting to audio lesson...</Text>
+      </View>
+    );
   }
 
   return <StreamVideo client={client}>{children}</StreamVideo>;
@@ -226,6 +275,45 @@ function LessonStreamCallProvider({ call, children }: { call: Call | null; child
 
   return <StreamCall call={call}>{children}</StreamCall>;
 }
+
+const rootStyles = StyleSheet.create({
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.neutral.background,
+    paddingHorizontal: 24,
+    gap: 12,
+  },
+  errorTitle: {
+    fontFamily: fontFamily.bold,
+    fontSize: 18,
+    lineHeight: 24,
+    color: colors.neutral.textPrimary,
+    textAlign: 'center',
+  },
+  message: {
+    fontFamily: fontFamily.medium,
+    fontSize: 14,
+    lineHeight: 20,
+    color: colors.neutral.textSecondary,
+    textAlign: 'center',
+  },
+  retryButton: {
+    borderWidth: 1,
+    borderColor: colors.neutral.border,
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    marginTop: 4,
+  },
+  retryLabel: {
+    fontFamily: fontFamily.semibold,
+    fontSize: 14,
+    lineHeight: 20,
+    color: colors.primary.purple,
+  },
+});
 
 const styles = StyleSheet.create({
   safeArea: {

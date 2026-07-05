@@ -18,7 +18,6 @@ export function captureLessonStarted(properties: {
 export function captureLessonAbandoned(properties: {
   lesson_id: string;
   time_into_lesson_seconds: number;
-  last_question_index: number;
 }) {
   posthog?.capture('lesson_abandoned', properties);
 }

@@ -14,9 +14,28 @@ export type VisionAgentStartSessionResponse = {
   session_started_at: string;
 };
 
+const REQUEST_TIMEOUT_MS = 30_000;
+
+async function fetchWithTimeout(url: string, init: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error('Vision agent request timed out. Please try again.');
+    }
+
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 export async function startVisionAgentSession(callId: string, callType: string) {
   const baseUrl = getVisionAgentBaseUrl();
-  const response = await fetch(`${baseUrl}/calls/${encodeURIComponent(callId)}/sessions`, {
+  const response = await fetchWithTimeout(`${baseUrl}/calls/${encodeURIComponent(callId)}/sessions`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -26,7 +45,8 @@ export async function startVisionAgentSession(callId: string, callType: string) 
 
   if (!response.ok) {
     const detail = await response.text();
-    throw new Error(detail || `Vision agent start failed (${response.status})`);
+    console.error('[vision-agent] start session failed', response.status, detail);
+    throw new Error('Failed to start vision agent session');
   }
 
   return response.json() as Promise<VisionAgentStartSessionResponse>;
@@ -34,7 +54,7 @@ export async function startVisionAgentSession(callId: string, callType: string) 
 
 export async function stopVisionAgentSession(callId: string, sessionId: string) {
   const baseUrl = getVisionAgentBaseUrl();
-  const response = await fetch(
+  const response = await fetchWithTimeout(
     `${baseUrl}/calls/${encodeURIComponent(callId)}/sessions/${encodeURIComponent(sessionId)}`,
     {
       method: 'DELETE',
@@ -43,6 +63,7 @@ export async function stopVisionAgentSession(callId: string, sessionId: string) 
 
   if (!response.ok && response.status !== 404) {
     const detail = await response.text();
-    throw new Error(detail || `Vision agent stop failed (${response.status})`);
+    console.error('[vision-agent] stop session failed', response.status, detail);
+    throw new Error('Failed to stop vision agent session');
   }
 }

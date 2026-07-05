@@ -32,16 +32,22 @@ AGENT_USER_NAME = "AI Teacher"
 
 async def prepare_audio_room(call: Any) -> None:
     """Grant the agent admin audio permissions and take the room live."""
-    await call.get()
+    call_id = getattr(call, "id", None) or getattr(call, "call_id", "unknown")
 
-    await call.update_call_members(
-        update_members=[MemberRequest(user_id=AGENT_USER_ID, role="admin")]
-    )
+    try:
+        await call.get()
 
-    call_data = getattr(call, "_data", None)
-    if call_data is not None and getattr(call_data, "backstage", False):
-        await call.go_live()
-        logger.info("Audio room is now live")
+        await call.update_call_members(
+            update_members=[MemberRequest(user_id=AGENT_USER_ID, role="admin")]
+        )
+
+        call_data = getattr(call, "_data", None)
+        if call_data is not None and getattr(call_data, "backstage", False):
+            await call.go_live()
+            logger.info("Audio room is now live for call %s", call_id)
+    except Exception:
+        logger.exception("Failed to prepare audio room for call %s", call_id)
+        raise
 
 
 async def create_agent(**kwargs) -> Agent:

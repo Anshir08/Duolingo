@@ -1,5 +1,7 @@
 import { StreamClient } from '@stream-io/node-sdk';
 
+import { ServerConfigError } from '@/lib/stream/server/apiErrors';
+
 let streamClient: StreamClient | null = null;
 
 export function getStreamServerClient() {
@@ -7,7 +9,7 @@ export function getStreamServerClient() {
   const apiSecret = process.env.STREAM_API_SECRET;
 
   if (!apiKey || !apiSecret) {
-    throw new Error('Missing STREAM_API_KEY or STREAM_API_SECRET');
+    throw new ServerConfigError('Missing STREAM_API_KEY or STREAM_API_SECRET');
   }
 
   if (!streamClient) {
@@ -21,7 +23,7 @@ export function getStreamApiKey() {
   const apiKey = process.env.STREAM_API_KEY;
 
   if (!apiKey) {
-    throw new Error('Missing STREAM_API_KEY');
+    throw new ServerConfigError('Missing STREAM_API_KEY');
   }
 
   return apiKey;
