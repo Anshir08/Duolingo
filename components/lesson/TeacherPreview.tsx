@@ -9,6 +9,7 @@ type TeacherPreviewProps = {
   message: string;
   languageName: string;
   teachingFocus: string;
+  isLiveCaption?: boolean;
 };
 
 const speechLanguageByName: Record<string, string> = {
@@ -20,7 +21,12 @@ const speechLanguageByName: Record<string, string> = {
   Chinese: 'zh-CN',
 };
 
-export function TeacherPreview({ message, languageName, teachingFocus }: TeacherPreviewProps) {
+export function TeacherPreview({
+  message,
+  languageName,
+  teachingFocus,
+  isLiveCaption = false,
+}: TeacherPreviewProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
 
   useEffect(() => {
@@ -57,6 +63,7 @@ export function TeacherPreview({ message, languageName, teachingFocus }: Teacher
 
       <View style={styles.speechBubble}>
         <View style={styles.bubbleCopy}>
+          {isLiveCaption ? <Text style={styles.liveLabel}>Live</Text> : null}
           <Text style={styles.bubbleText}>{message}</Text>
           <Text style={styles.bubbleFocus}>
             {languageName} • {teachingFocus}
@@ -148,6 +155,16 @@ const styles = StyleSheet.create({
   bubbleCopy: {
     flex: 1,
     paddingRight: 8,
+    gap: 4,
+  },
+  liveLabel: {
+    alignSelf: 'flex-start',
+    fontFamily: fontFamily.semibold,
+    fontSize: 10,
+    lineHeight: 12,
+    color: colors.primary.green,
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
   },
   bubbleText: {
     fontFamily: fontFamily.semibold,

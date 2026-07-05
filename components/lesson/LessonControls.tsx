@@ -9,6 +9,8 @@ type LessonControlsProps = {
   onToggleMic: () => void;
   onToggleSubtitles: () => void;
   onEndCall: () => void;
+  micDisabled?: boolean;
+  endCallDisabled?: boolean;
 };
 
 export function LessonControls({
@@ -17,6 +19,8 @@ export function LessonControls({
   onToggleMic,
   onToggleSubtitles,
   onEndCall,
+  micDisabled = false,
+  endCallDisabled = false,
 }: LessonControlsProps) {
   return (
     <View style={styles.row}>
@@ -32,6 +36,7 @@ export function LessonControls({
         label="Mic"
         icon={{ ios: micEnabled ? 'mic.fill' : 'mic.slash.fill', android: 'mic', web: 'mic' }}
         active={micEnabled}
+        disabled={micDisabled}
         onPress={onToggleMic}
       />
 
@@ -50,6 +55,7 @@ export function LessonControls({
         label="End Call"
         icon={{ ios: 'phone.down.fill', android: 'call_end', web: 'call_end' }}
         destructive
+        disabled={endCallDisabled}
         onPress={onEndCall}
       />
     </View>

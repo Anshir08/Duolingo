@@ -6,8 +6,10 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
+import { PostHogIdentitySync } from '@/components/analytics/PostHogIdentitySync';
 import { fontFamily, poppinsFontFiles } from '@/theme/fonts';
 
 export {
@@ -49,15 +51,18 @@ export default function RootLayout() {
   }
 
   return (
-    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="(auth)" />
-        <Stack.Screen name="language-selection" />
-        <Stack.Screen name="lesson/[id]" />
-        <Stack.Screen name="sso-callback" />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', headerShown: true }} />
-      </Stack>
-    </ClerkProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+        <PostHogIdentitySync />
+        <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="(auth)" />
+            <Stack.Screen name="language-selection" />
+            <Stack.Screen name="lesson/[id]" />
+            <Stack.Screen name="sso-callback" />
+            <Stack.Screen name="modal" options={{ presentation: 'modal', headerShown: true }} />
+          </Stack>
+      </ClerkProvider>
+    </GestureHandlerRootView>
   );
 }

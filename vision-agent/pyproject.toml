@@ -1,0 +1,14 @@
+[project]
+name = "duolingo-vision-agent"
+version = "0.1.0"
+description = "Voice-only AI language teacher for Duolingo lesson calls"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "vision-agents[openai]>=0.6.6",
+  "vision-agents-plugins-getstream>=0.6.6",
+  "python-dotenv>=1.0.0",
+]
+
+[project.scripts]
+duolingo-vision-agent = "main:main"

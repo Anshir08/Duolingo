@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { LanguageOption } from '@/components/language/LanguageOption';
 import { languages } from '@/data/languages';
+import { captureLanguageSelected } from '@/lib/posthog/events';
 import { useLanguageStore } from '@/store/languageStore';
 import type { LanguageId } from '@/types/learning';
 import { colors, fontFamily } from '@/theme';
@@ -65,6 +66,15 @@ export default function LanguageSelectionScreen() {
   };
 
   const handleSeeAllLanguages = () => {
+    const language = languages.find((item) => item.id === selectedId);
+
+    if (language) {
+      captureLanguageSelected({
+        language_code: language.id,
+        language_name: language.name,
+      });
+    }
+
     setSelectedLanguageId(selectedId);
     router.replace('/');
   };
