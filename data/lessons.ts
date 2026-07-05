@@ -3,13 +3,14 @@ import { getUnitById } from "./units";
 
 function createAITeacherPrompt(
 	languageName: string,
+	lessonTitle: string,
 	teachingFocus: string,
 	openingLine: string,
 ): AITeacherPrompt {
 	return {
 		teachingFocus,
 		openingLine,
-		systemPrompt: `You are a friendly English-speaking ${languageName} teacher for beginner learners. Always explain in clear English, teach ${languageName} phrases slowly, ask the learner to repeat, and give short encouraging feedback. Focus on: ${teachingFocus}. Keep responses brief and conversational.`,
+		systemPrompt: `You're a warm, energetic ${languageName} teacher leading the live lesson "${lessonTitle}". Speak mostly in English with natural contractions. Introduce ${languageName} words slowly, give the English translation right away, then ask the student to repeat. Listen to their answer and adapt—praise what worked, gently fix what didn't, then move to the next item from this lesson only. Stay strictly within this lesson's goals, vocabulary, and phrases; do not teach other languages or off-topic words. Focus: ${teachingFocus}. Keep every reply to one or two short conversational sentences.`,
 	};
 }
 
@@ -83,8 +84,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"Spanish",
-			"basic greetings and farewells",
-			"Hi! Let's start with simple Spanish greetings you can use every day.",
+			"Hello & Goodbye",
+			"hola, adiós, buenos días, and buenas noches for everyday greetings and farewells",
+			"Hey! I'm so glad you're here—we're gonna learn Spanish greetings you can use today. Ready to try the first one with me?",
 		),
 	},
 	{
@@ -137,8 +139,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"Spanish",
-			"self-introductions and asking names",
-			"Great job so far! Now let's practice introducing yourself in Spanish.",
+			"Introduce Yourself",
+			"me llamo, ¿cómo te llamas?, and short self-introduction phrases",
+			"Nice work so far! Today we're sticking to introductions—I'll teach you how to say your name in Spanish. Wanna give it a try?",
 		),
 	},
 	// Spanish — Unit 2
@@ -193,8 +196,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"Spanish",
-			"numbers one through ten",
-			"Let's count together in Spanish — this is useful everywhere you go!",
+			"Numbers 1–10",
+			"uno through diez for counting and everyday numbers",
+			"Alright, let's count in Spanish together—super useful stuff. I'll say one slowly, you repeat. Ready?",
 		),
 	},
 	{
@@ -256,8 +260,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"Spanish",
-			"polite expressions like please and thank you",
-			"Politeness goes a long way — let me teach you a few essential phrases.",
+			"Please & Thank You",
+			"por favor, gracias, and de nada for polite requests and thanks",
+			"Politeness makes a big difference—let's learn a few Spanish phrases that'll help you sound friendly. Sound good?",
 		),
 	},
 	{
@@ -319,8 +324,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"Spanish",
-			"ordering at a café",
-			"Imagine we're at a café in Madrid — let's practice ordering together!",
+			"At the Café",
+			"quiero un café, por favor, and ordering drinks at a café",
+			"Picture us at a café in Madrid—today we're only practicing how to order. I'll go first, then you repeat. Ready?",
 		),
 	},
 	// French — Unit 1
@@ -389,8 +395,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"French",
-			"French greetings for different times of day",
-			"Bonjour! Ready to learn your first French greetings?",
+			"Bonjour!",
+			"bonjour, bonsoir, and salut for greetings at different times of day",
+			"Hey there! Bonjour means hello in French—we're only covering greetings today. Wanna try the first one with me?",
 		),
 	},
 	{
@@ -447,8 +454,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"French",
-			"introducing yourself in French",
-			"Let's practice saying your name — a perfect first conversation skill!",
+			"My Name Is...",
+			"je m'appelle and asking someone's name in French",
+			"Great to see you! Today's all about saying your name in French—nice and simple. Ready to give it a shot?",
 		),
 	},
 	// French — Unit 2
@@ -506,8 +514,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"French",
-			"ordering food at a restaurant",
-			"Picture a Parisian café — let's order something delicious together!",
+			"Ordering Food",
+			"je voudrais and ordering food politely at a restaurant",
+			"Imagine a little Paris café—we're practicing how to order food in French today. I'll model it first, then you try. Deal?",
 		),
 	},
 	{
@@ -555,8 +564,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"French",
-			"asking for directions",
-			"Getting around a new city is easier with a few key questions — let's learn them!",
+			"Where Is...?",
+			"où est and asking for directions in French",
+			"Getting lost happens—let's learn a couple French phrases for asking directions. I'll go slow, you repeat. Ready?",
 		),
 	},
 	{
@@ -599,8 +609,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"French",
-			"French numbers one through ten",
-			"Numbers are everywhere — let's count together in French!",
+			"Numbers 1–10",
+			"un through dix for counting in French",
+			"Numbers pop up everywhere—let's count from one to ten in French together. I'll say one, you repeat. Sound good?",
 		),
 	},
 	// Japanese — Unit 1
@@ -662,8 +673,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"Japanese",
-			"basic Japanese greetings",
-			"Konnichiwa! Let's start with greetings you'll hear every day in Japan.",
+			"Basic Greetings",
+			"ohayō, konnichiwa, konbanwa, and everyday Japanese greetings",
+			"Hey! Konnichiwa is a hello you'll hear all the time in Japan—we're sticking to greetings today. Wanna try one with me?",
 		),
 	},
 	{
@@ -721,8 +733,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"Japanese",
-			"self-introductions in Japanese",
-			"Hajimemashite! Let's practice a polite self-introduction together.",
+			"Introduce Yourself",
+			"hajimemashite and watashi wa ... desu for polite introductions",
+			"Hajimemashite—nice to meet you! Today we're only practicing how to introduce yourself in Japanese. Ready to try?",
 		),
 	},
 	// Japanese — Unit 2
@@ -762,8 +775,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"Japanese",
-			"Japanese numbers one through five",
-			"Counting in Japanese is very useful — let's practice together!",
+			"Numbers 1–5",
+			"ichi through go for counting one to five in Japanese",
+			"Let's count to five in Japanese—super handy stuff. I'll say each number slowly, then you repeat. Ready?",
 		),
 	},
 	{
@@ -812,8 +826,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"Japanese",
-			"polite expressions like excuse me and sorry",
-			"Politeness is important in Japanese — let's learn a couple of essential phrases.",
+			"Excuse Me & Sorry",
+			"sumimasen and gomen nasai for polite apologies and getting attention",
+			"In Japan, politeness really matters—we're learning excuse me and sorry today. I'll model it first, then you try. Sound good?",
 		),
 	},
 	{
@@ -879,8 +894,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"Japanese",
-			"shopping and asking prices",
-			"Let's pretend we're at a shop in Tokyo — ready to practice?",
+			"At the Shop",
+			"kore wa ikura desu ka and asking prices while shopping",
+			"Let's pretend we're at a shop in Tokyo—today's lesson is all about asking prices. Wanna try the first phrase with me?",
 		),
 	},
 	{
@@ -918,8 +934,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"Spanish",
-			"travel and directions",
-			"Let's practice finding your way in Spanish.",
+			"Travel & Directions",
+			"¿dónde está?, a la derecha, and asking for directions while traveling",
+			"Travel day! We're only practicing Spanish phrases for finding your way. I'll teach one slowly—you repeat. Ready?",
 		),
 	},
 	{
@@ -959,8 +976,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"Spanish",
-			"shopping phrases",
-			"Time to practice shopping in Spanish.",
+			"Shopping",
+			"¿cuánto cuesta? and shopping phrases for asking prices",
+			"Shopping time! Today's lesson is just Spanish for asking prices—nothing else. Wanna try the first phrase with me?",
 		),
 	},
 	{
@@ -997,8 +1015,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"Spanish",
-			"family and friends vocabulary",
-			"Let's talk about the people you love.",
+			"Family & Friends",
+			"madre, padre, amigo, and family and friends vocabulary",
+			"Let's talk about the people you love—in Spanish only today. I'll introduce one word, you repeat. Sound good?",
 		),
 	},
 	{
@@ -1025,8 +1044,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"Korean",
-			"basic greetings",
-			"Let's start with Korean greetings.",
+			"Greetings & Introductions",
+			"annyeonghaseyo and basic Korean greetings and introductions",
+			"Hey! I'm glad you're here—we're starting with Korean greetings today, nothing else. Ready to try the first one with me?",
 		),
 	},
 	{
@@ -1055,8 +1075,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"Korean",
-			"daily life phrases",
-			"Let's practice everyday Korean.",
+			"Daily Life",
+			"everyday Korean phrases for daily routines and common situations",
+			"Today we're sticking to everyday Korean you'll actually use. I'll go slow, you repeat—deal?",
 		),
 	},
 	{
@@ -1089,8 +1110,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"Korean",
-			"ordering at a café",
-			"Let's practice at a Korean café.",
+			"At the Café",
+			"ordering coffee and drinks politely at a Korean café",
+			"Picture a cozy café in Seoul—we're only learning how to order today. I'll say it first, then you try. Ready?",
 		),
 	},
 	{
@@ -1123,8 +1145,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"Korean",
-			"directions",
-			"Let's find our way in Korean.",
+			"Travel & Directions",
+			"asking for directions and getting around in Korean",
+			"Lost? No worries—we're practicing Korean direction phrases today. One at a time, you repeat. Sound good?",
 		),
 	},
 	{
@@ -1159,8 +1182,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"Korean",
-			"shopping",
-			"Let's go shopping in Korean.",
+			"Shopping",
+			"asking prices and shopping phrases in Korean",
+			"Shopping lesson! We're only covering Korean phrases for buying things. Wanna try the first one with me?",
 		),
 	},
 	{
@@ -1193,8 +1217,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"German",
-			"greetings",
-			"Let's learn German greetings.",
+			"Greetings & Introductions",
+			"guten tag, hallo, and introducing yourself in German",
+			"Hey! Guten Tag is a hello you'll hear a lot—we're sticking to German greetings today. Ready to repeat after me?",
 		),
 	},
 	{
@@ -1227,8 +1252,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"German",
-			"daily life",
-			"Let's practice daily German.",
+			"Daily Life",
+			"everyday German phrases for daily routines and common situations",
+			"Today we're covering useful everyday German—just this lesson's phrases. I'll go slow, you repeat. Deal?",
 		),
 	},
 	{
@@ -1261,8 +1287,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"German",
-			"café orders",
-			"Let's order in German.",
+			"At the Café",
+			"ordering coffee and drinks at a German café",
+			"Imagine a café in Berlin—we're only practicing how to order in German today. I'll model it, then you try. Ready?",
 		),
 	},
 	{
@@ -1295,8 +1322,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"German",
-			"directions",
-			"Let's navigate in German.",
+			"Travel & Directions",
+			"asking for directions and navigating in German",
+			"Getting around is easier with a few German phrases—we're sticking to directions today. Wanna try the first one?",
 		),
 	},
 	{
@@ -1331,8 +1359,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"German",
-			"shopping",
-			"Let's shop in German.",
+			"Shopping",
+			"asking prices and shopping phrases in German",
+			"Shopping time! Today's lesson is German for buying things—one phrase at a time. Sound good?",
 		),
 	},
 	{
@@ -1359,8 +1388,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"Chinese",
-			"greetings",
-			"Let's start with Mandarin greetings.",
+			"Greetings & Introductions",
+			"nǐ hǎo and basic Mandarin greetings and introductions",
+			"Hey! Nǐ hǎo means hello in Mandarin—we're only doing greetings today. Ready to try it with me?",
 		),
 	},
 	{
@@ -1387,8 +1417,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"Chinese",
-			"daily life",
-			"Let's practice daily Mandarin.",
+			"Daily Life",
+			"everyday Mandarin phrases for daily routines and common situations",
+			"Today we're sticking to everyday Mandarin you'll actually use. I'll go slow—you repeat. Deal?",
 		),
 	},
 	{
@@ -1421,8 +1452,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"Chinese",
-			"café orders",
-			"Let's order in Mandarin.",
+			"At the Café",
+			"ordering coffee and drinks in Mandarin at a café",
+			"Picture a café in Beijing—we're only learning how to order in Mandarin today. I'll say it first, then you try. Ready?",
 		),
 	},
 	{
@@ -1455,8 +1487,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"Chinese",
-			"directions",
-			"Let's navigate in Mandarin.",
+			"Travel & Directions",
+			"asking for directions and getting around in Mandarin",
+			"Travel phrases only today—we're practicing Mandarin for finding your way. One at a time, you repeat. Sound good?",
 		),
 	},
 	{
@@ -1487,8 +1520,9 @@ export const lessons: Lesson[] = [
 		],
 		aiTeacher: createAITeacherPrompt(
 			"Chinese",
-			"shopping",
-			"Let's shop in Mandarin.",
+			"Shopping",
+			"asking prices and shopping phrases in Mandarin",
+			"Shopping lesson! We're only covering Mandarin for buying things. Wanna try the first phrase with me?",
 		),
 	},
 ];

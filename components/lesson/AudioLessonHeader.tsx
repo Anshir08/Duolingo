@@ -1,19 +1,37 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SymbolView } from 'expo-symbols';
 
+import type { LessonCallStatus } from '@/components/stream/constants';
 import { colors, fontFamily } from '@/theme';
 
 type AudioLessonHeaderProps = {
   lessonTitle: string;
+  callStatus: LessonCallStatus;
+  userName: string;
   streak?: number;
   onBack: () => void;
 };
 
+const STATUS_UI: Record<
+  LessonCallStatus,
+  { label: string; color: string }
+> = {
+  connecting: { label: 'Connecting', color: colors.semantic.streak },
+  joined: { label: 'Online', color: colors.primary.green },
+  muted: { label: 'Muted', color: colors.neutral.textSecondary },
+  error: { label: 'Offline', color: colors.semantic.error },
+  ended: { label: 'Ended', color: colors.neutral.textSecondary },
+};
+
 export function AudioLessonHeader({
   lessonTitle,
+  callStatus,
+  userName,
   streak = 12,
   onBack,
 }: AudioLessonHeaderProps) {
+  const statusUi = STATUS_UI[callStatus];
+
   return (
     <View style={styles.wrap}>
       <View style={styles.topRow}>
@@ -24,9 +42,10 @@ export function AudioLessonHeader({
         <View style={styles.titleBlock}>
           <Text style={styles.title}>AI Teacher</Text>
           <View style={styles.statusRow}>
-            <View style={styles.onlineDot} />
-            <Text style={styles.statusText}>Online</Text>
+            <View style={[styles.onlineDot, { backgroundColor: statusUi.color }]} />
+            <Text style={[styles.statusText, { color: statusUi.color }]}>{statusUi.label}</Text>
           </View>
+          <Text style={styles.userName}>{userName}</Text>
         </View>
 
         <View style={styles.actions}>
@@ -103,13 +122,18 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.primary.green,
   },
   statusText: {
     fontFamily: fontFamily.medium,
     fontSize: 12,
     lineHeight: 16,
-    color: colors.primary.green,
+  },
+  userName: {
+    marginTop: 2,
+    fontFamily: fontFamily.regular,
+    fontSize: 11,
+    lineHeight: 16,
+    color: colors.neutral.textSecondary,
   },
   actions: {
     flexDirection: 'row',

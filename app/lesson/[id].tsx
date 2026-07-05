@@ -1,89 +1,105 @@
-import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { lazy, Suspense, useMemo, useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AudioLessonHeader } from '@/components/lesson/AudioLessonHeader';
-import { LessonControls } from '@/components/lesson/LessonControls';
-import { LessonDetailsPanel } from '@/components/lesson/LessonDetailsPanel';
-import { LessonFeedbackCard } from '@/components/lesson/LessonFeedbackCard';
-import { TeacherPreview } from '@/components/lesson/TeacherPreview';
+import { OfflineAudioLessonContent } from '@/components/lesson/OfflineAudioLessonContent';
+import { StreamLessonErrorBoundary } from '@/components/lesson/StreamLessonErrorBoundary';
+import { useLessonAnalytics } from '@/components/lesson/useLessonAnalytics';
 import { getAudioLessonData } from '@/components/lesson/useAudioLessonData';
+import type { AudioLessonData } from '@/components/lesson/useAudioLessonData';
+import { canUseStreamVideo } from '@/components/stream/streamRuntime';
 import { colors, fontFamily } from '@/theme';
 
+const StreamLessonContent = lazy(() => import('@/components/lesson/StreamLessonContent'));
+
 export default function AudioLessonScreen() {
-  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const [streamLoadKey, setStreamLoadKey] = useState(0);
   const lessonResult = useMemo(() => getAudioLessonData(id), [id]);
-  const [micEnabled, setMicEnabled] = useState(true);
-  const [subtitlesEnabled, setSubtitlesEnabled] = useState(true);
+  const lessonData = lessonResult.status === 'found' ? lessonResult.data : null;
+
+  useLessonAnalytics(lessonData);
 
   if (lessonResult.status === 'not-found') {
-    return (
-      <View style={styles.loading}>
-        <Text style={styles.errorTitle}>Lesson not found</Text>
-        <Text style={styles.errorMessage}>
-          This lesson is unavailable or the link is invalid.
-        </Text>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Text style={styles.backLabel}>Go back</Text>
-        </Pressable>
-      </View>
-    );
+    return <LessonNotFound />;
   }
 
-  const { lesson, language, primaryGoal, teacherMessage } = lessonResult.data;
+  if (!canUseStreamVideo()) {
+    return <OfflineAudioLessonContent lessonData={lessonResult.data} />;
+  }
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <AudioLessonHeader
-        lessonTitle={`${language.name} • ${lesson.title}`}
-        onBack={() => router.back()}
-      />
-
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
+    <StreamLessonErrorBoundary
+      key={streamLoadKey}
+      fallback={(retry) => (
+        <StreamLessonLoadFallback
+          lessonData={lessonResult.data}
+          onRetry={() => {
+            setStreamLoadKey((current) => current + 1);
+            retry();
+          }}
+        />
+      )}
+    >
+      <Suspense
+        fallback={
+          <View style={styles.loading}>
+            <ActivityIndicator color={colors.primary.purple} />
+            <Text style={styles.loadingText}>Loading audio lesson...</Text>
+          </View>
+        }
       >
-        <TeacherPreview
-          message={teacherMessage}
-          languageName={language.name}
-          teachingFocus={lesson.aiTeacher.teachingFocus}
-        />
+        <StreamLessonContent lessonData={lessonResult.data} />
+      </Suspense>
+    </StreamLessonErrorBoundary>
+  );
+}
 
-        <LessonControls
-          micEnabled={micEnabled}
-          subtitlesEnabled={subtitlesEnabled}
-          onToggleMic={() => setMicEnabled((current) => !current)}
-          onToggleSubtitles={() => setSubtitlesEnabled((current) => !current)}
-          onEndCall={() => router.back()}
-        />
+type StreamLessonLoadFallbackProps = {
+  lessonData: AudioLessonData;
+  onRetry: () => void;
+};
 
-        <LessonFeedbackCard />
+function StreamLessonLoadFallback({ lessonData, onRetry }: StreamLessonLoadFallbackProps) {
+  const [useOfflineFallback, setUseOfflineFallback] = useState(false);
 
-        <LessonDetailsPanel
-          goal={primaryGoal}
-          phrases={lesson.phrases}
-          teachingFocus={lesson.aiTeacher.teachingFocus}
-          visible={subtitlesEnabled}
-        />
-      </ScrollView>
-    </SafeAreaView>
+  if (useOfflineFallback) {
+    return <OfflineAudioLessonContent lessonData={lessonData} />;
+  }
+
+  return (
+    <View style={styles.loading}>
+      <Text style={styles.errorTitle}>Couldn&apos;t load live lesson</Text>
+      <Text style={styles.errorMessage}>
+        The live lesson module failed to load. Retry or continue in preview mode.
+      </Text>
+      <Pressable onPress={onRetry} style={styles.backButton}>
+        <Text style={styles.backLabel}>Retry</Text>
+      </Pressable>
+      <Pressable onPress={() => setUseOfflineFallback(true)} style={styles.secondaryButton}>
+        <Text style={styles.secondaryLabel}>Continue in preview mode</Text>
+      </Pressable>
+    </View>
+  );
+}
+
+function LessonNotFound() {
+  const router = useRouter();
+
+  return (
+    <View style={styles.loading}>
+      <Text style={styles.errorTitle}>Lesson not found</Text>
+      <Text style={styles.errorMessage}>
+        This lesson is unavailable or the link is invalid.
+      </Text>
+      <Pressable onPress={() => router.back()} style={styles.backButton}>
+        <Text style={styles.backLabel}>Go back</Text>
+      </Pressable>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.neutral.background,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 24,
-  },
   loading: {
     flex: 1,
     alignItems: 'center',
@@ -91,6 +107,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.neutral.background,
     paddingHorizontal: 24,
     gap: 12,
+  },
+  loadingText: {
+    fontFamily: fontFamily.medium,
+    fontSize: 14,
+    lineHeight: 20,
+    color: colors.neutral.textSecondary,
   },
   errorTitle: {
     fontFamily: fontFamily.bold,
@@ -119,5 +141,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     color: colors.primary.purple,
+  },
+  secondaryButton: {
+    borderWidth: 1,
+    borderColor: colors.neutral.border,
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+  },
+  secondaryLabel: {
+    fontFamily: fontFamily.medium,
+    fontSize: 14,
+    lineHeight: 20,
+    color: colors.neutral.textSecondary,
   },
 });
